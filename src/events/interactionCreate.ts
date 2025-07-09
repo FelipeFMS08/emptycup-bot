@@ -1,6 +1,16 @@
-import { Client, Interaction, ButtonInteraction, Collection } from 'discord.js';
+import {
+  Client,
+  Interaction,
+  ButtonInteraction,
+  Collection,
+  InteractionType,
+} from "discord.js";
+import { handleModalSubmit } from "../commands/anunciar";
 
-export async function handleInteractionCreate(client: Client & { commands: Collection<string, any> }  , interaction: Interaction)  {
+export async function handleInteractionCreate(
+  client: Client & { commands: Collection<string, any> },
+  interaction: Interaction
+) {
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
@@ -9,11 +19,15 @@ export async function handleInteractionCreate(client: Client & { commands: Colle
       await command.execute(interaction);
     } catch (error) {
       console.error(error);
-      await interaction.reply({ content: 'Erro ao executar o comando.', ephemeral: true });
+      await interaction.reply({
+        content: "Erro ao executar o comando.",
+        ephemeral: true,
+      });
     }
-  } else if (interaction.isButton()) {
-    if (interaction.customId === 'primary-button') {
-      await interaction.reply({ content: 'Você clicou no botão!', ephemeral: true });
-    }
+  } else if (
+    interaction.type === InteractionType.ModalSubmit &&
+    interaction.customId === "modalAnnouncement"
+  ) {
+    await handleModalSubmit(interaction);
   }
 }

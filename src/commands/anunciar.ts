@@ -57,47 +57,46 @@ export default {
 
     await interaction.showModal(modal);
   },
+};
 
-  async handleModalSubmit(interaction: ModalSubmitInteraction) {
-    if (interaction.customId !== "modalAnnouncement") return;
+export async function handleModalSubmit(interaction: ModalSubmitInteraction) {
+  if (interaction.customId !== "modalAnnouncement") return;
 
-    const title = interaction.fields.getTextInputValue("titleInput");
-    const description =
-      interaction.fields.getTextInputValue("descriptionInput");
+  const title = interaction.fields.getTextInputValue("titleInput");
+  const description = interaction.fields.getTextInputValue("descriptionInput");
 
-    const embed = new EmbedBuilder()
-      .setTitle(`📢 ${title}`)
-      .setDescription(description)
-      .setColor(0x00aeff)
-      .setTimestamp()
-      .setFooter({
-        text: `Anunciado por ${interaction.user.tag}`,
-        iconURL: interaction.user.displayAvatarURL(),
-      });
-
-    const channel = await interaction.guild?.channels.fetch(
-      process.env.ANNOUNCEMENTS_CHANNEL_ID!
-    );
-    if (!channel || !channel.isTextBased()) {
-      return interaction.reply({
-        content: "Canal de anúncios não encontrado.",
-        ephemeral: true,
-      });
-    }
-
-    await channel.send({ embeds: [embed] });
-    await interaction.reply({
-      content: "✅ Anúncio enviado com sucesso!",
-      ephemeral: true,
+  const embed = new EmbedBuilder()
+    .setTitle(`📢 ${title}`)
+    .setDescription(description)
+    .setColor(0x00aeff)
+    .setTimestamp()
+    .setFooter({
+      text: `Anunciado por ${interaction.user.tag}`,
+      iconURL: interaction.user.displayAvatarURL(),
     });
 
-    const logChannel = await interaction.guild?.channels.fetch(
-      process.env.LOG_CHANNEL_ID!
+  const channel = await interaction.guild?.channels.fetch(
+    process.env.ANNOUNCEMENTS_CHANNEL_ID!
+  );
+  if (!channel || !channel.isTextBased()) {
+    return interaction.reply({
+      content: "Canal de anúncios não encontrado.",
+      ephemeral: true,
+    });
+  }
+
+  await channel.send({ embeds: [embed] });
+  await interaction.reply({
+    content: "✅ Anúncio enviado com sucesso!",
+    ephemeral: true,
+  });
+
+  const logChannel = await interaction.guild?.channels.fetch(
+    process.env.LOG_CHANNEL_ID!
+  );
+  if (logChannel?.isTextBased()) {
+    await logChannel.send(
+      `📢 ${interaction.user.tag} fez um anúncio: **${title}**`
     );
-    if (logChannel?.isTextBased()) {
-      await logChannel.send(
-        `📢 ${interaction.user.tag} fez um anúncio: **${title}**`
-      );
-    }
-  },
-};
+  }
+}
